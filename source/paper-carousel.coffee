@@ -6,7 +6,10 @@ Polymer
 		Polymer.IronResizableBehavior
 	]
 
-	listeners: 'iron-resize': 'onResize'
+	listeners: {
+		'iron-resize': 'onResize'
+		# 'popeye.drag': 'onDrag'
+	}
 
 	items: ->
 		# set vars
@@ -326,10 +329,36 @@ Polymer
 		# set active dot
 		@setActiveDot(@getCurrentPage())
 
+	getDragState: (e) ->
+		# set vars
+		module = this
+		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
+		moduleWrapperRect = moduleWrapper.getBoundingClientRect()
+		movement = Math.round(((e.detail.dx*100) / moduleWrapperRect.width)*1000)/1000
+
+		switch e.detail.state
+			when 'start'
+				moduleWrapper.style.transition = 'none'
+				module.dragPosition = @getContainerPosition()
+			when 'track'
+				realMovement = Math.round((module.dragPosition+movement)*1000)/1000
+				moduleWrapper.style.transform = 'translateX(' + realMovement + '%)'
+			when 'end'
+				moduleWrapper.style.transition = ''
+
+	onDrag: ->
+		# set vars
+		module = this
+		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
+
+		# add drag event
+		module.listen(this.$$('.paper-carousel_wrapper'), 'track', 'getDragState')
+
 	ready: ->
 
 	attached: ->
 		@printControls()
+		@onDrag()
 
 	onResize: ->
 		@setContainerSize()
