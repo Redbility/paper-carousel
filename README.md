@@ -24,6 +24,7 @@ A simple example of its use:
   <template>
     <script src="../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="paper-carousel.html">
+	 <next-code-block></next-code-block>
   </template>
 </custom-element-demo>
 ```
@@ -39,7 +40,7 @@ A simple example of its use:
 </paper-carousel>
 ```
 
-## Attributes
+### Attributes
 
 | Attribute Name | Functionality | Type | Default |
 |----------------|-------------|-------------|-------------|
@@ -49,7 +50,7 @@ A simple example of its use:
 | dots | Shows or hides the navigation dots | Boolean | true |
 | dotText | Shows or hides numbers inside dots | Boolean | true |
 
-## Methods
+### Methods
 
 | Method Name | Explanation |
 |-------------|-------------|
