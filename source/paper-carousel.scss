@@ -1,6 +1,3 @@
-@import '../../grid/source/config';
-@import '../../../styles/texts/source/texts';
-
 :host {
 	display: block;
 	position: relative;
@@ -77,6 +74,8 @@
 		.paper-carousel_dots_wrapper {
 			position: relative;
 			display: inline-block;
+			margin: 0;
+			padding: 0;
 			z-index: 2;
 		}
 

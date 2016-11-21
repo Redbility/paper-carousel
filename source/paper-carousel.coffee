@@ -113,10 +113,11 @@ Polymer
 		module = this
 		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
+		movement = Math.round((key * -itemPortion)*1000)/1000
 
 		# Apply movement
 		if key < @getTotalItems() && key >= 0
-			moduleWrapper.style.transform = 'translateX(' + key * -itemPortion + '%)'
+			moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
 		@setActiveDot(@getCurrentPage())
@@ -160,10 +161,11 @@ Polymer
 		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
 		pagePortion = @getPages()[key].length
+		movement = Math.round((key * pagePortion * -itemPortion)*1000)/1000
 
 		# Apply movement
 		if key < @getTotalPages() && key >= 0
-			moduleWrapper.style.transform = 'translateX(' + key * pagePortion * -itemPortion + '%)'
+			moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
 		@setActiveDot(key)

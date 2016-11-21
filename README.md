@@ -1,25 +1,33 @@
+[![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg?style=flat-square)](https://beta.webcomponents.org/element/Redbility/paper-carousel)
+
 # Paper-carousel
 
 ### Description
 
 Polymer element for displaying a responsive carousel
 
-
-
 ### Install
 
 First you need bower, [see their site](http://bower.io/) for details
 
 ```sh
-bower install --save paper-carousel
+bower install --save Redbility/paper-carousel
 ```
-
-
 
 ### Examples
 
 A simple example of its use:
 
+<!---
+```
+<custom-element-demo>
+  <template>
+    <script src="../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="paper-carousel.html">
+  </template>
+</custom-element-demo>
+```
+-->
 ```html
 <paper-carousel items="4" responsive="1280:3, 800:2, 460:1" controls="true" dots="true" dotText="false">
 	<div class="paper-carousel-demo-indigo" data-text="#1"></div>
@@ -31,7 +39,6 @@ A simple example of its use:
 </paper-carousel>
 ```
 
-
 ## Attributes
 
 | Attribute Name | Functionality | Type | Default |
@@ -41,8 +48,6 @@ A simple example of its use:
 | controls | Shows or hides the forward or backward page controls | Boolean | true |
 | dots | Shows or hides the navigation dots | Boolean | true |
 | dotText | Shows or hides numbers inside dots | Boolean | true |
-
-
 
 ## Methods
 
