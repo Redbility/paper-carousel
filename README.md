@@ -17,7 +17,6 @@ bower install --save Redbility/paper-carousel
 ### Examples
 
 A simple example of its use:
-
 <!---
 ```
 <custom-element-demo>
@@ -30,13 +29,34 @@ A simple example of its use:
 ```
 -->
 ```html
-<paper-carousel items="4" responsive="1280:3, 800:2, 460:1" controls="true" dots="true" dotText="false">
+<paper-carousel items="3" responsive="600:2, 460:1" controls="true" dots="true" dotText="false">
 	<div class="paper-carousel-demo-indigo" data-text="#1"></div>
 	<div class="paper-carousel-demo-pink" data-text="#2"></div>
 	<div class="paper-carousel-demo-teal" data-text="#3"></div>
 	<div class="paper-carousel-demo-amber" data-text="#4"></div>
 	<div class="paper-carousel-demo-blue" data-text="#5"></div>
 	<div class="paper-carousel-demo-green" data-text="#6"></div>
+</paper-carousel>
+```
+Image gallery example:
+<!---
+```
+<custom-element-demo>
+  <template>
+    <script src="../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="paper-carousel.html">
+	 <next-code-block></next-code-block>
+  </template>
+</custom-element-demo>
+```
+-->
+```html
+<paper-carousel items="1" dotText="false">
+	<img src="https://unsplash.it/800/500/?image=257" draggable="false"/>
+	<img src="https://unsplash.it/800/500/?image=250" draggable="false"/>
+	<img src="https://unsplash.it/800/500/?image=399" draggable="false"/>
+	<img src="https://unsplash.it/800/500/?image=146" draggable="false"/>
+	<img src="https://unsplash.it/800/500/?image=248" draggable="false"/>
 </paper-carousel>
 ```
 
@@ -46,7 +66,7 @@ A simple example of its use:
 |----------------|-------------|-------------|-------------|
 | items | Number of slides shown on each page | Number | 1 |
 | responsive | String that contains information about breakpoints | String | null |
-| controls | Shows or hides the forward or backward page controls | Boolean | true |
+| controls | Shows or hides the forward and backward page controls | Boolean | true |
 | dots | Shows or hides the navigation dots | Boolean | true |
 | dotText | Shows or hides numbers inside dots | Boolean | true |
 
@@ -64,4 +84,3 @@ A simple example of its use:
 | goToPage(number) | Moves carousel to the page position |
 | goToNextPage() | Moves carousel to the next page |
 | goToPrevPage() | Moves carousel to the prev page |
-| setActiveDot() | Mark a dot element as active |

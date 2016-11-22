@@ -2,13 +2,11 @@ Polymer
 	is: 'paper-carousel'
 
 	behaviors: [
-		Polymer.IronScrollTargetBehavior
 		Polymer.IronResizableBehavior
 	]
 
 	listeners: {
 		'iron-resize': 'onResize'
-		# 'popeye.drag': 'onDrag'
 	}
 
 	items: ->
@@ -123,7 +121,7 @@ Polymer
 			moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
-		@setActiveDot(@getCurrentPage())
+		@_setActiveDot(@getCurrentPage())
 
 	goToNextItem: ->
 		# set vars
@@ -171,7 +169,7 @@ Polymer
 			moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
-		@setActiveDot(key)
+		@_setActiveDot(key)
 
 	goToNextPage: ->
 		# set vars
@@ -190,19 +188,23 @@ Polymer
 			@goToPage(@getCurrentPage()-1)
 
 		# set active dot
-		@setActiveDot(@getCurrentPage())
+		@_setActiveDot(@getCurrentPage())
 
-	setContainerSize: ->
+	_setContainerSize: ->
 		# set vars
 		module = this
 		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
 		moduleRect = module.getBoundingClientRect()
 		containerWidth = moduleRect.width * @getTotalItems() / @items()
+		childWidth = Math.round(100/@getTotalItems()*10000)/10000
 
+		# set children width
+		for child in moduleWrapper.children
+			child.style.width = childWidth + '%'
 		# set container width
 		return moduleWrapper.style.minWidth = containerWidth + 'px'
 
-	setActiveDot: (key) ->
+	_setActiveDot: (key) ->
 		# set vars
 		module = this
 		activeDots = module.querySelectorAll('.paper-carousel_dot')
@@ -221,7 +223,7 @@ Polymer
 		if activeDotLine
 			activeDotLine.style.transform = 'translateX(' + key + '00%)'
 
-	printControls: ->
+	_printControls: ->
 		# set vars
 		module = this
 		loopIncrement = 1
@@ -265,7 +267,7 @@ Polymer
 		if @getTotalPages() > 1
 			Polymer.dom(module.root).appendChild(controlsContainer)
 
-	printDots: ->
+	_printDots: ->
 		# set vars
 		module = this
 		loopIncrement = 1
@@ -326,9 +328,9 @@ Polymer
 			Polymer.dom(module.root).appendChild(dotsContainer)
 
 		# set active dot
-		@setActiveDot(@getCurrentPage())
+		@_setActiveDot(@getCurrentPage())
 
-	getDragState: (e) ->
+	_getDragState: (e) ->
 		# set vars
 		module = this
 		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
@@ -377,12 +379,10 @@ Polymer
 					endRangeLimit = endLimit+rangeLimit/2
 					startRangeLimit = startLimit-rangeLimit/2
 
-					if movement < 0 && swipeVelocity < 130
-						console.log 'right'
+					if movement < 0 && swipeVelocity < 150
 						if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
 							@goToItem(itemLoop+1)
-					if movement > 0 && swipeVelocity < 130
-						console.log 'left'
+					if movement > 0 && swipeVelocity < 150
 						if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
 							@goToItem(itemLoop)
 
@@ -392,22 +392,20 @@ Polymer
 						@goToItem(itemLoop+1)
 					itemLoop++
 
-	onDrag: ->
+	_onDrag: ->
 		# set vars
 		module = this
 		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
 
 		# add drag event
-		module.listen(this.$$('.paper-carousel_wrapper'), 'track', 'getDragState')
+		module.listen(this.$$('.paper-carousel_wrapper'), 'track', '_getDragState')
 
 	ready: ->
 
 	attached: ->
-		@printControls()
-		@onDrag()
+		@_printControls()
+		@_onDrag()
 
 	onResize: ->
-		@setContainerSize()
-		@printDots()
-
-	_scrollHandler: ->
+		@_setContainerSize()
+		@_printDots()

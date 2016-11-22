@@ -133,6 +133,7 @@
 				font-size: 0.8125em;
 				line-height: 2em;
 				font-weight: 400;
+				text-decoration: none;
 
 				&::before {
 					content: '';
@@ -152,7 +153,6 @@
 		[class*=paper-carousel-demo] {
 			position: relative;
 			height: 400px;
-			width: 16.6667%;
 
 			&::before {
 				position: absolute;

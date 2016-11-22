@@ -15,13 +15,18 @@
     "bower_components",
     "source"
   ],
+  "keywords": [
+    "web-components",
+    "carousel",
+    "slider",
+    "gallery",
+    "images",
+    "responsive"
+  ],
   "dependencies": {
     "polymer": "polymer/polymer#^v1.2.0",
-    "iron-elements": "PolymerElements/iron-elements#^1.0.0",
     "iron-icons": "PolymerElements/iron-icons#^1.0.0",
-    "iron-scroll-target-behavior": "PolymerElements/iron-scroll-target-behavior#^1.0.0",
     "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#^1.0.0",
     "paper-styles": "PolymerElements/paper-styles#^1.0.0"
-  },
-  "devDependencies": {}
+  }
 }
