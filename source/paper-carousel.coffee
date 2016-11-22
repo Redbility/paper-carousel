@@ -249,12 +249,10 @@ Polymer
 		prevLink.classList.add('paper-carousel_controls_arrow-prev')
 
 		# Click anchors event
-		nextLink.addEventListener 'click', (e) ->
-			e.preventDefault()
-			module.goToNextItem()
-		prevLink.addEventListener 'click', (e) ->
-			e.preventDefault()
-			module.goToPrevItem()
+		nextLink.addEventListener 'click', (e) -> e.preventDefault()
+		prevLink.addEventListener 'click', (e) -> e.preventDefault()
+		module.listen nextLink, 'tap', 'goToNextItem'
+		module.listen prevLink, 'tap', 'goToPrevItem'
 
 		# parse container
 		Polymer.dom(nextLink).appendChild(nextLinkIcon)
@@ -304,10 +302,11 @@ Polymer
 			dotItemLink.setAttribute('href', '')
 			dotItemLink.setAttribute('data-rel', loopIncrement-1)
 			# dot click event
-			dotItemLink.addEventListener 'click', (e) ->
-				e.preventDefault()
-				activeItem = @getAttribute('data-rel')
-				module.goToPage(activeItem)
+			module.clickDotsEvent = (e) ->
+				activeItem = e.target.getAttribute('data-rel')
+				@goToPage(activeItem)
+			dotItemLink.addEventListener 'click', (e) -> e.preventDefault()
+			module.listen dotItemLink, 'tap', 'clickDotsEvent'
 			# set dot text
 			if @dotText() == true
 				dotItemLink.textContent = loopIncrement
@@ -337,20 +336,61 @@ Polymer
 		movement = Math.round(((e.detail.dx*100) / moduleWrapperRect.width)*1000)/1000
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
 		maxLimit = Math.round((itemPortion*(@getTotalItems()-@items()))*1000)/1000
-		console.log maxLimit
+		endTime = 0
 
 		switch e.detail.state
 			when 'start'
-				moduleWrapper.style.transition = 'none'
+				# set vars
+				module.startTime = new Date().getTime()
 				module.dragPosition = @getContainerPosition()
+
+				# Remove transition duration
+				moduleWrapper.style.transitionDuration = '0s'
 			when 'track'
+				# set vars
 				realMovement = Math.round((module.dragPosition+movement)*1000)/1000
 				realMovement = Math.min(realMovement, 0)
 				realMovement = Math.max(realMovement, -maxLimit)
-				console.log realMovement
+
+				# apply touch movement
 				moduleWrapper.style.transform = 'translateX(' + realMovement + '%)'
 			when 'end'
-				moduleWrapper.style.transition = ''
+				# set vars
+				endTime = new Date().getTime()
+				swipeVelocity = endTime - module.startTime
+				limitSwipeVelocity = Math.max(Math.min(swipeVelocity, 500), 100)
+				itemLoop = 0
+
+				# apply dynamic transition duration
+				moduleWrapper.style.transitionDuration = limitSwipeVelocity + 'ms'
+
+				# Reset transition duration
+				module.resetTransition = () ->
+					moduleWrapper.style.transitionDuration = ''
+				module.listen moduleWrapper, 'transitionend', 'resetTransition'
+
+				# adjust current item
+				while itemLoop < @getTotalItems()
+					startLimit = -Math.round((itemPortion*itemLoop)*1000)/1000
+					endLimit = -Math.round((itemPortion*(itemLoop+1))*1000)/1000
+					rangeLimit = Math.round((startLimit-endLimit)*1000)/1000
+					endRangeLimit = endLimit+rangeLimit/2
+					startRangeLimit = startLimit-rangeLimit/2
+
+					if movement < 0 && swipeVelocity < 130
+						console.log 'right'
+						if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+							@goToItem(itemLoop+1)
+					if movement > 0 && swipeVelocity < 130
+						console.log 'left'
+						if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+							@goToItem(itemLoop)
+
+					if @getContainerPosition() < startLimit && @getContainerPosition() >= endRangeLimit
+						@goToItem(itemLoop)
+					if @getContainerPosition() < startRangeLimit && @getContainerPosition() >= endLimit
+						@goToItem(itemLoop+1)
+					itemLoop++
 
 	onDrag: ->
 		# set vars
