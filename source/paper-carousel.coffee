@@ -6,7 +6,7 @@ Polymer
 	]
 
 	listeners: {
-		'iron-resize': 'onResize'
+		'iron-resize': '_onResize'
 	}
 
 	items: ->
@@ -38,7 +38,7 @@ Polymer
 		else
 			return 1
 
-	dotText: ->
+	_dotText: ->
 		# set vars
 		module = this
 		value = module.getAttribute('dotText')
@@ -161,8 +161,9 @@ Polymer
 		module = this
 		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
-		pagePortion = @getPages()[key].length
-		movement = Math.round((key * pagePortion * -itemPortion)*1000)/1000
+		pagePortionFix = (@items() - @getPages()[key].length) * itemPortion
+		pagePortion = (-itemPortion * @items())
+		movement = Math.round(((key * pagePortion) + pagePortionFix)*1000)/1000
 
 		# Apply movement
 		if key < @getTotalPages() && key >= 0
@@ -310,7 +311,7 @@ Polymer
 			dotItemLink.addEventListener 'click', (e) -> e.preventDefault()
 			module.listen dotItemLink, 'tap', 'clickDotsEvent'
 			# set dot text
-			if @dotText() == true
+			if @_dotText() == true
 				dotItemLink.textContent = loopIncrement
 			# current item line creation
 			dotCurrentLine = document.createElement('li')
@@ -406,6 +407,6 @@ Polymer
 		@_printControls()
 		@_onDrag()
 
-	onResize: ->
+	_onResize: ->
 		@_setContainerSize()
 		@_printDots()
