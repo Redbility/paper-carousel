@@ -340,6 +340,7 @@ Polymer
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
 		maxLimit = Math.round((itemPortion*(@getTotalItems()-@items()))*1000)/1000
 		endTime = 0
+		touchValue = e.detail.dx
 
 		switch e.detail.state
 			when 'start'
@@ -355,8 +356,9 @@ Polymer
 				realMovement = Math.min(realMovement, 0)
 				realMovement = Math.max(realMovement, -maxLimit)
 
-				# apply touch movement
-				moduleWrapper.style.transform = 'translateX(' + realMovement + '%)'
+				if touchValue > 15 || touchValue < -15
+					# apply touch movement
+					moduleWrapper.style.transform = 'translateX(' + realMovement + '%)'
 			when 'end'
 				# set vars
 				endTime = new Date().getTime()
@@ -372,26 +374,27 @@ Polymer
 					moduleWrapper.style.transitionDuration = ''
 				module.listen moduleWrapper, 'transitionend', 'resetTransition'
 
-				# adjust current item
-				while itemLoop < @getTotalItems()
-					startLimit = -Math.round((itemPortion*itemLoop)*1000)/1000
-					endLimit = -Math.round((itemPortion*(itemLoop+1))*1000)/1000
-					rangeLimit = Math.round((startLimit-endLimit)*1000)/1000
-					endRangeLimit = endLimit+rangeLimit/2
-					startRangeLimit = startLimit-rangeLimit/2
+				if touchValue > 15 || touchValue < -15
+					# adjust current item
+					while itemLoop < @getTotalItems()
+						startLimit = -Math.round((itemPortion*itemLoop)*1000)/1000
+						endLimit = -Math.round((itemPortion*(itemLoop+1))*1000)/1000
+						rangeLimit = Math.round((startLimit-endLimit)*1000)/1000
+						endRangeLimit = endLimit+rangeLimit/2
+						startRangeLimit = startLimit-rangeLimit/2
 
-					if movement < 0 && swipeVelocity < 150
-						if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
-							@goToItem(itemLoop+1)
-					if movement > 0 && swipeVelocity < 150
-						if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+						if movement < 0 && swipeVelocity < 150
+							if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+								@goToItem(itemLoop+1)
+						if movement > 0 && swipeVelocity < 150
+							if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+								@goToItem(itemLoop)
+
+						if @getContainerPosition() < startLimit && @getContainerPosition() >= endRangeLimit
 							@goToItem(itemLoop)
-
-					if @getContainerPosition() < startLimit && @getContainerPosition() >= endRangeLimit
-						@goToItem(itemLoop)
-					if @getContainerPosition() < startRangeLimit && @getContainerPosition() >= endLimit
-						@goToItem(itemLoop+1)
-					itemLoop++
+						if @getContainerPosition() < startRangeLimit && @getContainerPosition() >= endLimit
+							@goToItem(itemLoop+1)
+						itemLoop++
 
 	_onDrag: ->
 		# set vars
