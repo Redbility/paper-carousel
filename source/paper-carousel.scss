@@ -41,6 +41,11 @@
 			color: var(--dot-background-color);
 			pointer-events: auto;
 
+			&.paper-carousel_controls_arrow--disabled {
+				pointer-events: none;
+				cursor: default;
+			}
+
 			iron-icon {
 				opacity: var(--light-secondary-opacity);
 				-webkit-filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.4));
