@@ -396,6 +396,14 @@ Polymer
 				limitSwipeVelocity = Math.max(Math.min(swipeVelocity, 500), 100)
 				itemLoop = 0
 
+				# limit transition duration
+				if @getContainerPosition() > -5
+					limitSwipeVelocity = 500
+				if @getContainerPosition() < -(@getTotalItems()-@items()) * itemPortion+5
+					limitSwipeVelocity = 500
+				if touchValue < 30 && touchValue > -30
+					limitSwipeVelocity = 500
+
 				# apply dynamic transition duration
 				moduleWrapper.style.transitionDuration = limitSwipeVelocity + 'ms'
 
