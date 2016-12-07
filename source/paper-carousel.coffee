@@ -122,6 +122,7 @@ Polymer
 
 		# set active dot
 		@_setActiveDot(@getCurrentPage())
+		@_setDisabledControls()
 
 	goToNextItem: ->
 		# set vars
@@ -171,6 +172,7 @@ Polymer
 
 		# set active dot
 		@_setActiveDot(key)
+		@_setDisabledControls()
 
 	goToNextPage: ->
 		# set vars
@@ -187,9 +189,6 @@ Polymer
 		# Apply movement if container is not to the starting position
 		if @getContainerPosition() < -5
 			@goToPage(@getCurrentPage()-1)
-
-		# set active dot
-		@_setActiveDot(@getCurrentPage())
 
 	_setContainerSize: ->
 		# set vars
@@ -233,6 +232,14 @@ Polymer
 		if module.getAttribute('controls') == 'false'
 			return
 
+		# only print controls if totalPages change
+		if module.tpages == @items()
+			return
+
+		# remove container if already exist
+		if module.querySelector('.paper-carousel_controls')
+			module.querySelector('.paper-carousel_controls').remove()
+
 		# container creation
 		controlsContainer = document.createElement('div')
 		controlsContainer.classList.add('paper-carousel_controls')
@@ -267,6 +274,29 @@ Polymer
 		# print
 		if @getTotalPages() > 1
 			Polymer.dom(module.root).appendChild(controlsContainer)
+
+		# set disabled control
+		@_setDisabledControls()
+
+	_setDisabledControls: (key) ->
+		# set vars
+		module = this
+		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
+		controlLeft = module.querySelector('.paper-carousel_controls_arrow-prev')
+		controlRight = module.querySelector('.paper-carousel_controls_arrow-next')
+
+		if (controlRight != null && controlLeft != null)
+			# add class to disable left control
+			if @getContainerPosition() > -5
+				controlLeft.classList.add('paper-carousel_controls_arrow--disabled')
+			else
+				controlLeft.classList.remove('paper-carousel_controls_arrow--disabled')
+
+			# add class to disable right control
+			if @getContainerPosition() < -(@getTotalItems()-@items()-1) * itemPortion-5
+				controlRight.classList.add('paper-carousel_controls_arrow--disabled')
+			else
+				controlRight.classList.remove('paper-carousel_controls_arrow--disabled')
 
 	_printDots: ->
 		# set vars
@@ -341,7 +371,6 @@ Polymer
 		maxLimit = Math.round((itemPortion*(@getTotalItems()-@items()))*1000)/1000
 		endTime = 0
 		touchValue = e.detail.dx
-		console.log e.detail.dy
 
 		switch e.detail.state
 			when 'start'
@@ -408,9 +437,9 @@ Polymer
 	ready: ->
 
 	attached: ->
-		@_printControls()
 		@_onDrag()
 
 	_onResize: ->
 		@_setContainerSize()
+		@_printControls()
 		@_printDots()
