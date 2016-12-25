@@ -56,9 +56,14 @@ Polymer
 		# set vars
 		module = this
 		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
+		totalItems = 0
 
 		#set item number
-		return moduleWrapper.children.length
+		for child in moduleWrapper.children
+			if child.localName != 'template'
+				totalItems++
+
+		return totalItems
 
 	getPages: ->
 		# set vars
@@ -200,7 +205,8 @@ Polymer
 
 		# set children width
 		for child in moduleWrapper.children
-			child.style.width = childWidth + '%'
+			if child.localName != 'template'
+				child.style.width = childWidth + '%'
 		# set container width
 		return moduleWrapper.style.minWidth = containerWidth + 'px'
 
