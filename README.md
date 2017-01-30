@@ -69,6 +69,8 @@ Image gallery example:
 | controls | Shows or hides the forward and backward page controls | Boolean | true |
 | dots | Shows or hides the navigation dots | Boolean | true |
 | dotText | Shows or hides numbers inside dots | Boolean | true |
+| prevIcon | Allows customize the prev arrow icon | String | image:navigate-before |
+| nextIcon | Allows customize the next arrow icon | String | image:navigate-next |
 
 ### Methods
 

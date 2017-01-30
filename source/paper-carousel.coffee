@@ -258,10 +258,16 @@ Polymer
 		# Anchors creation
 		nextLink = document.createElement('a')
 		nextLinkIcon = document.createElement('iron-icon')
-		nextLinkIcon.setAttribute('icon', 'image:navigate-next')
+		if module.getAttribute('nextIcon') != null
+			nextLinkIcon.setAttribute('icon', module.getAttribute('nextIcon'))
+		else
+			nextLinkIcon.setAttribute('icon', 'image:navigate-next')
 		prevLink = document.createElement('a')
 		prevLinkIcon = document.createElement('iron-icon')
-		prevLinkIcon.setAttribute('icon', 'image:navigate-before')
+		if module.getAttribute('prevIcon') != null
+			prevLinkIcon.setAttribute('icon', module.getAttribute('prevIcon'))
+		else
+			prevLinkIcon.setAttribute('icon', 'image:navigate-before')
 		nextLink.setAttribute('href', '')
 		nextLink.classList.add('paper-carousel_controls_arrow-next')
 		prevLink.setAttribute('href', '')
