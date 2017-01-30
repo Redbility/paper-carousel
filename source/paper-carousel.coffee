@@ -123,7 +123,8 @@ Polymer
 
 		# Apply movement
 		if key < @getTotalItems() && key >= 0
-			moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+			if @items() < @getTotalItems()
+				moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
 		@_setActiveDot(@getCurrentPage())
@@ -173,7 +174,8 @@ Polymer
 
 		# Apply movement
 		if key < @getTotalPages() && key >= 0
-			moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+			if @items() < @getTotalItems()
+				moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
 		@_setActiveDot(key)
@@ -227,7 +229,8 @@ Polymer
 
 		# move active extra dot
 		if activeDotLine
-			activeDotLine.style.transform = 'translateX(' + key + '00%)'
+			if @items() < @getTotalItems()
+				activeDotLine.style.transform = 'translateX(' + key + '00%)'
 
 	_printControls: ->
 		# set vars
@@ -394,7 +397,8 @@ Polymer
 
 				if touchValue > 30 || touchValue < -30
 					# apply touch movement
-					moduleWrapper.style.transform = 'translateX(' + realMovement + '%)'
+					if @items() < @getTotalItems()
+						moduleWrapper.style.transform = 'translateX(' + realMovement + '%)'
 			when 'end'
 				# set vars
 				endTime = new Date().getTime()
