@@ -18,6 +18,7 @@
 			width: 100%;
 			z-index: 1;
 			transition: transform 0.5s ease-in-out;
+			touch-action: pan-y;
 		}
 
 
