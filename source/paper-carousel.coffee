@@ -445,6 +445,7 @@ Polymer
 
 		# add drag event
 		module.listen(this.$$('.paper-carousel_wrapper'), 'track', '_getDragState')
+		moduleWrapper.style.touchAction = ''
 
 	ready: ->
 
