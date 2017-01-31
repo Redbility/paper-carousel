@@ -143,7 +143,7 @@ Polymer
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
 
 		# Apply movement if container is not to the starting position
-		if @getContainerPosition() < -5
+		if @getContainerPosition() < 0
 			@goToItem(@getCurrentItem()-1)
 
 	getCurrentPage: ->
