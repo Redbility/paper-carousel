@@ -308,7 +308,7 @@ Polymer
 				controlLeft.classList.remove('paper-carousel_controls_arrow--disabled')
 
 			# add class to disable right control
-			if @getContainerPosition() < -(@getTotalItems()-@items()-1) * itemPortion-5
+			if @getContainerPosition() < -(@getTotalItems()-@items()-1) * itemPortion
 				controlRight.classList.add('paper-carousel_controls_arrow--disabled')
 			else
 				controlRight.classList.remove('paper-carousel_controls_arrow--disabled')
