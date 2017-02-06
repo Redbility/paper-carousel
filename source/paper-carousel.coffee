@@ -232,7 +232,7 @@ Polymer
 			if @items() < @getTotalItems()
 				activeDotLine.style.transform = 'translateX(' + key + '00%)'
 
-	_printControls: ->
+	_printControls: (force) ->
 		# set vars
 		module = this
 		loopIncrement = 1
@@ -242,8 +242,9 @@ Polymer
 			return
 
 		# only print controls if totalPages change
-		if module.tpages == @items()
-			return
+		if force != true
+			if module.tpages == @items()
+				return
 
 		# remove container if already exist
 		if module.querySelector('.paper-carousel_controls')
@@ -313,7 +314,7 @@ Polymer
 			else
 				controlRight.classList.remove('paper-carousel_controls_arrow--disabled')
 
-	_printDots: ->
+	_printDots: (force) ->
 		# set vars
 		module = this
 		loopIncrement = 1
@@ -331,10 +332,11 @@ Polymer
 		Polymer.dom(dotsContainer).appendChild(dotsWrapper)
 
 		# only print dots if totalPages change
-		if module.tpages != @items()
-			module.tpages = @items()
-		else
-			return
+		if force != true
+			if module.tpages != @items()
+				module.tpages = @items()
+			else
+				return
 
 		# remove container if already exist
 		if module.querySelector('.paper-carousel_dots')
@@ -459,10 +461,18 @@ Polymer
 		module.listen(this.$$('.paper-carousel_wrapper'), 'track', '_getDragState')
 		moduleWrapper.style.touchAction = ''
 
+	refresh: ->
+		@_setContainerSize()
+		@_printControls(true)
+		@_printDots(true)
+		@_onResize()
+
 	ready: ->
 
 	attached: ->
 		@_onDrag()
+		@_onResize()
+
 
 	_onResize: ->
 		@_setContainerSize()
