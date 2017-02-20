@@ -106,11 +106,12 @@ Polymer
 
 	getCurrentItem: ->
 		# set vars
+		module = this
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
 		item = 0
 
 		while item <= @getTotalItems()
-			if Math.round((itemPortion * item)*1000)/1000 == -@getContainerPosition()
+			if (Math.round((itemPortion * item)*1000)/1000) == -@getContainerPosition()
 				return item
 			item++
 
@@ -124,7 +125,10 @@ Polymer
 		# Apply movement
 		if key < @getTotalItems() && key >= 0
 			if @items() < @getTotalItems()
-				moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+				if module.isCentered == 'true'
+					moduleWrapper.style.transform = 'translateX(' + (movement + 25) + '%)'
+				else
+					moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
 		@_setActiveDot(@getCurrentPage())
@@ -132,11 +136,17 @@ Polymer
 
 	goToNextItem: ->
 		# set vars
+		module = this
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
 
 		# Apply movement if container is not to the final position
-		if @getContainerPosition() > -(@getTotalItems()-@items()-1) * itemPortion - 5
+		if module.isCentered == 'true'
+			console.log @getCurrentItem()
 			@goToItem(@getCurrentItem()+1)
+		else
+			if @getContainerPosition() > -(@getTotalItems()-@items()-1) * itemPortion - 5
+				@goToItem(@getCurrentItem()+1)
+
 
 	goToPrevItem: ->
 		# set vars
@@ -175,7 +185,10 @@ Polymer
 		# Apply movement
 		if key < @getTotalPages() && key >= 0
 			if @items() < @getTotalItems()
-				moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+				if module.isCentered == 'true'
+					moduleWrapper.style.transform = 'translateX(' + (movement + 25) + '%)'
+				else
+					moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
 		@_setActiveDot(key)
@@ -452,6 +465,15 @@ Polymer
 							@goToItem(itemLoop+1)
 						itemLoop++
 
+	_initialPosition: ->
+		# set vars
+		module = this
+		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
+		module.isCentered = module.getAttribute('center')
+
+		if module.isCentered == 'true'
+			moduleWrapper.style.transform = 'translateX(25%)'
+
 	_onDrag: ->
 		# set vars
 		module = this
@@ -468,11 +490,11 @@ Polymer
 		@_onResize()
 
 	ready: ->
+		@_initialPosition()
 
 	attached: ->
 		@_onDrag()
 		@_onResize()
-
 
 	_onResize: ->
 		@_setContainerSize()
