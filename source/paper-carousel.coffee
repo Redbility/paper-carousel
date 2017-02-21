@@ -394,19 +394,44 @@ Polymer
 				# set vars
 				module.startTime = new Date().getTime()
 				module.dragPosition = @getContainerPosition()
+				window.touching = true
 
 				# Remove transition duration
 				moduleWrapper.style.transitionDuration = '0s'
+
+				window.addEventListener 'scroll', ->
+					clearInterval window.scrollingInterval
+					# Set on if scroll move
+					window.scrolling = true
+					window.touchScroll = true
+
+					# Set off if scrolling is end
+					window.scrollingInterval = setTimeout (->
+						window.scrolling = false
+						if window.touching == false
+							window.touchScroll = false
+					), 50
+
 			when 'track'
 				# set vars
 				realMovement = Math.round((module.dragPosition+movement)*1000)/1000
 				realMovement = Math.min(realMovement, 0)
 				realMovement = Math.max(realMovement, -maxLimit)
 
-				if touchValue > 30 || touchValue < -30
-					# apply touch movement
-					if @items() < @getTotalItems()
-						moduleWrapper.style.transform = 'translateX(' + realMovement + '%)'
+				if window.scrolling == false && window.touchScroll == false
+					if touchValue > 30 || touchValue < -30
+						# apply touch movement
+						if @items() < @getTotalItems() && window.movingCarousel == true
+							moduleWrapper.style.transform = 'translateX(' + realMovement + '%)'
+
+						# Setting on if touch move
+						window.movingCarousel = true
+
+				# block the page scroll while move the carousel
+				window.addEventListener 'touchmove', (e) ->
+					if window.movingCarousel == true
+						e.preventDefault()
+
 			when 'end'
 				# set vars
 				endTime = new Date().getTime()
@@ -430,27 +455,33 @@ Polymer
 					moduleWrapper.style.transitionDuration = ''
 				module.listen moduleWrapper, 'transitionend', 'resetTransition'
 
-				if touchValue > 30 || touchValue < -30
-					# adjust current item
-					while itemLoop < @getTotalItems()
-						startLimit = -Math.round((itemPortion*itemLoop)*1000)/1000
-						endLimit = -Math.round((itemPortion*(itemLoop+1))*1000)/1000
-						rangeLimit = Math.round((startLimit-endLimit)*1000)/1000
-						endRangeLimit = endLimit+rangeLimit/2
-						startRangeLimit = startLimit-rangeLimit/2
+				if window.scrolling == false && window.touchScroll == false
+					if touchValue > 30 || touchValue < -30
+						# adjust current item
+						while itemLoop < @getTotalItems()
+							startLimit = -Math.round((itemPortion*itemLoop)*1000)/1000
+							endLimit = -Math.round((itemPortion*(itemLoop+1))*1000)/1000
+							rangeLimit = Math.round((startLimit-endLimit)*1000)/1000
+							endRangeLimit = endLimit+rangeLimit/2
+							startRangeLimit = startLimit-rangeLimit/2
 
-						if movement < 0 && swipeVelocity < 150
-							if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
-								@goToItem(itemLoop+1)
-						if movement > 0 && swipeVelocity < 150
-							if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+							if movement < 0 && swipeVelocity < 150
+								if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+									@goToItem(itemLoop+1)
+							if movement > 0 && swipeVelocity < 150
+								if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+									@goToItem(itemLoop)
+
+							if @getContainerPosition() < startLimit && @getContainerPosition() >= endRangeLimit
 								@goToItem(itemLoop)
+							if @getContainerPosition() < startRangeLimit && @getContainerPosition() >= endLimit
+								@goToItem(itemLoop+1)
+							itemLoop++
 
-						if @getContainerPosition() < startLimit && @getContainerPosition() >= endRangeLimit
-							@goToItem(itemLoop)
-						if @getContainerPosition() < startRangeLimit && @getContainerPosition() >= endLimit
-							@goToItem(itemLoop+1)
-						itemLoop++
+				# Setting off if touch end
+				window.movingCarousel = false
+				window.touchScroll = false
+				window.touching = false
 
 	_onDrag: ->
 		# set vars
@@ -472,7 +503,6 @@ Polymer
 	attached: ->
 		@_onDrag()
 		@_onResize()
-
 
 	_onResize: ->
 		@_setContainerSize()
