@@ -394,15 +394,23 @@ Polymer
 				# set vars
 				module.startTime = new Date().getTime()
 				module.dragPosition = @getContainerPosition()
-				module.scrolling = false
-				module.touching = false
+				window.touching = true
 
 				# Remove transition duration
 				moduleWrapper.style.transitionDuration = '0s'
 
 				window.addEventListener 'scroll', ->
-					# Setting on if scroll move
-					module.scrolling = true
+					clearInterval window.scrollingInterval
+					# Set on if scroll move
+					window.scrolling = true
+					window.touchScroll = true
+
+					# Set off if scrolling is end
+					window.scrollingInterval = setTimeout (->
+						window.scrolling = false
+						if window.touching == false
+							window.touchScroll = false
+					), 50
 
 			when 'track'
 				# set vars
@@ -410,18 +418,18 @@ Polymer
 				realMovement = Math.min(realMovement, 0)
 				realMovement = Math.max(realMovement, -maxLimit)
 
-				if module.scrolling == false
+				if window.scrolling == false && window.touchScroll == false
 					if touchValue > 30 || touchValue < -30
 						# apply touch movement
-						if @items() < @getTotalItems() && module.touching == true
+						if @items() < @getTotalItems() && window.movingCarousel == true
 							moduleWrapper.style.transform = 'translateX(' + realMovement + '%)'
 
 						# Setting on if touch move
-						module.touching = true
+						window.movingCarousel = true
 
 				# block the page scroll while move the carousel
 				window.addEventListener 'touchmove', (e) ->
-					if module.touching == true
+					if window.movingCarousel == true
 						e.preventDefault()
 
 			when 'end'
@@ -447,7 +455,7 @@ Polymer
 					moduleWrapper.style.transitionDuration = ''
 				module.listen moduleWrapper, 'transitionend', 'resetTransition'
 
-				if module.scrolling == false
+				if window.scrolling == false && window.touchScroll == false
 					if touchValue > 30 || touchValue < -30
 						# adjust current item
 						while itemLoop < @getTotalItems()
@@ -471,8 +479,9 @@ Polymer
 							itemLoop++
 
 				# Setting off if touch end
-				module.touching = false
-				module.scrolling = false
+				window.movingCarousel = false
+				window.touchScroll = false
+				window.touching = false
 
 	_onDrag: ->
 		# set vars
