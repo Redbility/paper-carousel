@@ -1,5 +1,6 @@
 bower_components
 .DS_Store
-tools
+node_modules
 .scss-lint.yml
 coffeelint.json
+yarn.lock
