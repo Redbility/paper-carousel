@@ -138,6 +138,7 @@ Polymer
 
 	getCurrentItem: ->
 		# set vars
+		module = this
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
 		itemPortion2 = Math.round((100 / @_getRealTotalItems())*1000)/1000
 		item = 0
@@ -145,11 +146,13 @@ Polymer
 		if @_isLoop
 			while item <= @_getRealTotalItems()
 				if Math.round((itemPortion2 * item)*1000)/1000 == -@getContainerPosition()
+					module.currentItem = item - @itemsToPrepend.length
 					return item - @itemsToPrepend.length
 				item++
 		else
 			while item <= @getTotalItems()
 				if Math.round((itemPortion * item)*1000)/1000 == -@getContainerPosition()
+					module.currentItem = item
 					return item
 				item++
 
@@ -157,20 +160,17 @@ Polymer
 		# set vars
 		module = this
 		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
-		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
-		movement = Math.round((key * -itemPortion)*1000)/1000
-		itemPortion2 = Math.round((100 / @_getRealTotalItems())*1000)/1000
-		movement2 = Math.round(((key + @itemsToPrepend.length) * -itemPortion)*1000)/1000
+		if @_isLoop()
+			itemPortion = Math.round((100 / @_getRealTotalItems())*1000)/1000
+			movement = Math.round(((key + @itemsToPrepend.length) * -itemPortion)*1000)/1000
+		else
+			itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
+			movement = Math.round((key * -itemPortion)*1000)/1000
 
 		# Apply movement
-		if @_isLoop()
-			if key < @getTotalItems() && key >= 0
-				if @items() < @getTotalItems()
-					moduleWrapper.style.transform = 'translateX(' + movement2 + '%)'
-		else
-			if key < @getTotalItems() && key >= 0
-				if @items() < @getTotalItems()
-					moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+		if key < @getTotalItems() && key >= 0
+			if @items() < @getTotalItems()
+				moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
 		@_setActiveDot(@getCurrentPage())
@@ -188,6 +188,7 @@ Polymer
 		else
 			if @getContainerPosition() > -(@getTotalItems()-@items()-1) * itemPortion - 5
 				@goToItem(@getCurrentItem()+1)
+
 
 	goToPrevItem: ->
 		# set vars
@@ -230,7 +231,7 @@ Polymer
 		pagePortion = (-itemPortion * @items())
 		pagePortion2 = (-itemPortion2 * @items())
 
-		if @_isLoop
+		if @_isLoop()
 			movement = (Math.round(((key * pagePortion2) + pagePortionFix2)*1000)/1000) + pagePortion2
 		else
 			movement = Math.round(((key * pagePortion) + pagePortionFix)*1000)/1000
@@ -368,25 +369,23 @@ Polymer
 		controlLeft = module.querySelector('.paper-carousel_controls_arrow-prev')
 		controlRight = module.querySelector('.paper-carousel_controls_arrow-next')
 
-		console.log parseInt(@getContainerPosition() + (@itemsToPrepend.length * itemPortion))
-
-		if @_isLoop
+		if @_isLoop()
 			if (controlRight != null && controlLeft != null)
 				# add class to disable left control
-				if @getContainerPosition() + (@itemsToPrepend.length * itemPortion2) > -5
+				if @getContainerPosition() + (@itemsToPrepend.length * itemPortion2) > -0.5
 					controlLeft.classList.add('paper-carousel_controls_arrow--disabled')
 				else
 					controlLeft.classList.remove('paper-carousel_controls_arrow--disabled')
 
 				# add class to disable right control
-				if @getContainerPosition() + (@itemsToPrepend.length * itemPortion2) < -(@getTotalItems()-@items()-1) * itemPortion2
+				if @getContainerPosition() + (@itemsToPrepend.length * itemPortion2) < (-(@getTotalItems()-@items()-1) * itemPortion2) - 0.5
 					controlRight.classList.add('paper-carousel_controls_arrow--disabled')
 				else
 					controlRight.classList.remove('paper-carousel_controls_arrow--disabled')
 		else
 			if (controlRight != null && controlLeft != null)
 				# add class to disable left control
-				if @getContainerPosition() > -5
+				if @getContainerPosition() > -0.5
 					controlLeft.classList.add('paper-carousel_controls_arrow--disabled')
 				else
 					controlLeft.classList.remove('paper-carousel_controls_arrow--disabled')
@@ -660,3 +659,4 @@ Polymer
 		@_setContainerSize()
 		@_printControls()
 		@_printDots()
+		@goToItem(@currentItem)
