@@ -168,9 +168,12 @@ Polymer
 			movement = Math.round((key * -itemPortion)*1000)/1000
 
 		# Apply movement
-		if key < @getTotalItems() && key >= 0
-			if @items() < @getTotalItems()
-				moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+		if @_isLoop()
+			moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+		else
+			if key < @getTotalItems() && key >= 0
+				if @items() < @getTotalItems()
+					moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
 		@_setActiveDot(@getCurrentPage())
@@ -178,13 +181,19 @@ Polymer
 
 	goToNextItem: ->
 		# set vars
+		module = this
+		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
 		itemPortion2 = Math.round((100 / @_getRealTotalItems())*1000)/1000
 
 		# Apply movement if container is not to the final position
 		if @_isLoop()
-			if @getContainerPosition() > -(@getTotalItems()-1) * itemPortion2 - 5
-				@goToItem(@getCurrentItem()+1)
+			@goToItem(@getCurrentItem()+1)
+			if @getCurrentItem() == @getTotalItems() + 1
+				moduleWrapper.style.transition = 'none'
+				@goToItem(0)
+				moduleWrapper.style.transition = ''
+				@goToItem(1)
 		else
 			if @getContainerPosition() > -(@getTotalItems()-@items()-1) * itemPortion - 5
 				@goToItem(@getCurrentItem()+1)
@@ -192,13 +201,21 @@ Polymer
 
 	goToPrevItem: ->
 		# set vars
+		module = this
+		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
 		itemPortion2 = Math.round((100 / @_getRealTotalItems())*1000)/1000
 
 		# Apply movement if container is not to the starting position
 		if @_isLoop
-			if @getContainerPosition() < 0
-				@goToItem(@getCurrentItem()-1)
+			@goToItem(@getCurrentItem()-1)
+			# console.log @getCurrentItem(), -@items()
+			if @getCurrentItem() == undefined
+				moduleWrapper.style.transition = 'none'
+				@goToItem(@getTotalItems() - @items())
+				console.log @getTotalItems() - @items()
+				moduleWrapper.style.transition = ''
+				@goToItem((@getTotalItems() - @items()) - 1)
 		else
 			if @getContainerPosition() < 0
 				@goToItem(@getCurrentItem()-1)
@@ -214,7 +231,8 @@ Polymer
 			lastItem = parseFloat(@getCurrentItem()) + parseFloat(@items())
 
 			if lastItem >= @getTotalItems()
-				@goToPage(@getTotalPages()-1)
+				if !@_isLoop()
+					@goToPage(@getTotalPages()-1)
 				return @getTotalPages()-1
 			if page.indexOf(@getCurrentItem()) != -1
 				return pageKey
@@ -237,9 +255,12 @@ Polymer
 			movement = Math.round(((key * pagePortion) + pagePortionFix)*1000)/1000
 
 		# Apply movement
-		if key < @getTotalPages() && key >= 0
-			if @items() < @getTotalItems()
-				moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+		if @_isLoop()
+			moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+		else
+			if key < @getTotalPages() && key >= 0
+				if @items() < @getTotalItems()
+					moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
 		@_setActiveDot(key)
@@ -370,18 +391,18 @@ Polymer
 		controlRight = module.querySelector('.paper-carousel_controls_arrow-next')
 
 		if @_isLoop()
-			if (controlRight != null && controlLeft != null)
-				# add class to disable left control
-				if @getContainerPosition() + (@itemsToPrepend.length * itemPortion2) > -0.5
-					controlLeft.classList.add('paper-carousel_controls_arrow--disabled')
-				else
-					controlLeft.classList.remove('paper-carousel_controls_arrow--disabled')
+			# if (controlRight != null && controlLeft != null)
+			# 	# add class to disable left control
+			# 	if @getContainerPosition() + (@itemsToPrepend.length * itemPortion2) > -0.5
+			# 		controlLeft.classList.add('paper-carousel_controls_arrow--disabled')
+			# 	else
+			# 		controlLeft.classList.remove('paper-carousel_controls_arrow--disabled')
 
-				# add class to disable right control
-				if @getContainerPosition() + (@itemsToPrepend.length * itemPortion2) < (-(@getTotalItems()-@items()-1) * itemPortion2) - 0.5
-					controlRight.classList.add('paper-carousel_controls_arrow--disabled')
-				else
-					controlRight.classList.remove('paper-carousel_controls_arrow--disabled')
+			# 	# add class to disable right control
+			# 	if @getContainerPosition() + (@itemsToPrepend.length * itemPortion2) < (-(@getTotalItems()-@items()-1) * itemPortion2) - 0.5
+			# 		controlRight.classList.add('paper-carousel_controls_arrow--disabled')
+			# 	else
+			# 		controlRight.classList.remove('paper-carousel_controls_arrow--disabled')
 		else
 			if (controlRight != null && controlLeft != null)
 				# add class to disable left control
@@ -581,14 +602,15 @@ Polymer
 
 				# set items to cloning
 				[].forEach.call moduleWrapper.children, (val, key) ->
-					childrenReverse.push(val)
-
 					if key < module.items()
 						clonedItem = val.cloneNode(true)
 						clonedItem.classList.add('cloned')
 						module.itemsToAppend.push clonedItem
 
-				[].forEach.call childrenReverse.reverse(), (val, key) ->
+					if key >= (module.getTotalItems() - module.items()) && key <= module.getTotalItems()
+						childrenReverse.push(val)
+
+				[].forEach.call childrenReverse, (val, key) ->
 					if key < module.items()
 						clonedItem = val.cloneNode(true)
 						clonedItem.classList.add('cloned')
