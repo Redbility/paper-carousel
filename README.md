@@ -4,11 +4,11 @@
 
 ### Description
 
-Polymer element for displaying a responsive carousel
+Polymer element for displaying a responsive carousel.
 
 ### Install
 
-First you need bower, [see their site](http://bower.io/) for details
+Bower is necessary to manage the element. [Have a look at their website](http://bower.io/) for more details.
 
 ```sh
 bower install --save Redbility/paper-carousel
@@ -16,7 +16,7 @@ bower install --save Redbility/paper-carousel
 
 ### Examples
 
-A simple example of its use:
+Simple use example:
 <!---
 ```
 <custom-element-demo>
@@ -69,6 +69,8 @@ Image gallery example:
 | controls | Shows or hides the forward and backward page controls | Boolean | true |
 | dots | Shows or hides the navigation dots | Boolean | true |
 | dotText | Shows or hides numbers inside dots | Boolean | true |
+| prevIcon | Allows customize the prev arrow icon | String | image:navigate-before |
+| nextIcon | Allows customize the next arrow icon | String | image:navigate-next |
 
 ### Methods
 
@@ -84,3 +86,19 @@ Image gallery example:
 | goToPage(number) | Moves carousel to the page position |
 | goToNextPage() | Moves carousel to the next page |
 | goToPrevPage() | Moves carousel to the prev page |
+| refresh() | Forces carousel reload |
+
+### How to contribute
+
+This element has been developed on Pug, Sass and CoffeeScript, you can find this files at `source` folder.
+To manage and compile this languages you will have to use [Gulp](http://gulpjs.com/).
+You will find a folder called `tools`, that folder includes gulpfile.js and package.json.
+
+When the dependencies have been installed, you can launch the different tasks of gulpFile from the `tools` folder.
+You can try the component with following command:
+
+```sh
+gulp serve
+```
+
+The serve task creates a server where visualize the component, watches for changes on the files and reload the page after compile it.
