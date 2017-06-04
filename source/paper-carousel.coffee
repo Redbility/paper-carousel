@@ -52,6 +52,20 @@ Polymer
 		else
 			return true
 
+	_isLoop: ->
+		# set vars
+		module = this
+		value = module.getAttribute('loop')
+
+		#set item number
+		if (value != null)
+			if (value == 'false')
+				return false
+			else
+				return true
+		else
+			return true
+
 	getTotalItems: ->
 		# set vars
 		module = this
@@ -440,6 +454,36 @@ Polymer
 							@goToItem(itemLoop+1)
 						itemLoop++
 
+	_loop: ->
+		# set vars
+		module = this
+		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
+		totalItems = 0
+		itemsToAppend = []
+		itemsToPrepend = []
+
+		console.log @getTotalItems()
+		console.log @getPages()
+
+		# set items to cloning
+		[].forEach.call moduleWrapper.children, (val, key) ->
+			if key < module.items()
+				clonedItem = val.cloneNode(true)
+				clonedItem.classList.add('cloned')
+				itemsToAppend.push clonedItem
+			if key >= module.items()
+				clonedItem = val.cloneNode(true)
+				clonedItem.classList.add('cloned')
+				itemsToPrepend.push clonedItem
+
+		# append cloned items
+		[].forEach.call itemsToAppend, (val, key) ->
+			moduleWrapper.appendChild val
+
+		# prepend cloned items
+		[].forEach.call itemsToPrepend.reverse(), (val, key) ->
+			moduleWrapper.insertBefore val.cloneNode(true), moduleWrapper.children[0]
+
 	_onDrag: ->
 		# set vars
 		module = this
@@ -448,12 +492,21 @@ Polymer
 		# add drag event
 		module.listen(this.$$('.paper-carousel_wrapper'), 'track', '_getDragState')
 
+	onTransitionEnd: (things) ->
+		# set vars
+		module = this
+		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
+
+		# add listener
+		moduleWrapper.addEventListener 'transitionend', things
+
 	ready: ->
 
 	attached: ->
 		@_onDrag()
 
 	_onResize: ->
+		@_loop()
 		@_setContainerSize()
 		@_printControls()
 		@_printDots()
