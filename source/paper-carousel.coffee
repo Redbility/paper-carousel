@@ -52,7 +52,39 @@ Polymer
 		else
 			return true
 
+	_isLoop: ->
+		# set vars
+		module = this
+		value = module.getAttribute('loop')
+
+		#set item number
+		if (value != null)
+			if (value == 'true')
+				return true
+			else
+				return false
+		else
+			return false
+
 	getTotalItems: ->
+		# set vars
+		module = this
+		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
+		totalItems = 0
+
+		#set item number
+		if module._isLoop()
+			for child in moduleWrapper.children
+				if child.localName != 'template' && !child.classList.contains('cloned')
+					totalItems++
+		else
+			for child in moduleWrapper.children
+				if child.localName != 'template'
+					totalItems++
+
+		return totalItems
+
+	_getRealTotalItems: ->
 		# set vars
 		module = this
 		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
@@ -106,25 +138,42 @@ Polymer
 
 	getCurrentItem: ->
 		# set vars
+		module = this
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
+		itemPortion2 = Math.round((100 / @_getRealTotalItems())*1000)/1000
 		item = 0
 
-		while item <= @getTotalItems()
-			if Math.round((itemPortion * item)*1000)/1000 == -@getContainerPosition()
-				return item
-			item++
+		if @_isLoop
+			while item <= @_getRealTotalItems()
+				if Math.round((itemPortion2 * item)*1000)/1000 == -@getContainerPosition()
+					module.currentItem = item - @itemsToPrepend.length
+					return item - @itemsToPrepend.length
+				item++
+		else
+			while item <= @getTotalItems()
+				if Math.round((itemPortion * item)*1000)/1000 == -@getContainerPosition()
+					module.currentItem = item
+					return item
+				item++
 
 	goToItem: (key) ->
 		# set vars
 		module = this
 		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
-		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
-		movement = Math.round((key * -itemPortion)*1000)/1000
+		if @_isLoop()
+			itemPortion = Math.round((100 / @_getRealTotalItems())*1000)/1000
+			movement = Math.round(((key + @itemsToPrepend.length) * -itemPortion)*1000)/1000
+		else
+			itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
+			movement = Math.round((key * -itemPortion)*1000)/1000
 
 		# Apply movement
-		if key < @getTotalItems() && key >= 0
-			if @items() < @getTotalItems()
-				moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+		if @_isLoop()
+			moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+		else
+			if key < @getTotalItems() && key >= 0
+				if @items() < @getTotalItems()
+					moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
 		@_setActiveDot(@getCurrentPage())
@@ -132,19 +181,44 @@ Polymer
 
 	goToNextItem: ->
 		# set vars
+		module = this
+		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
+		itemPortion2 = Math.round((100 / @_getRealTotalItems())*1000)/1000
 
 		# Apply movement if container is not to the final position
-		if @getContainerPosition() > -(@getTotalItems()-@items()-1) * itemPortion - 5
+		if @_isLoop()
 			@goToItem(@getCurrentItem()+1)
+			if @getCurrentItem() == @getTotalItems() + 1
+				moduleWrapper.style.transition = 'none'
+				@goToItem(0)
+				moduleWrapper.style.transition = ''
+				@goToItem(1)
+		else
+			if @getContainerPosition() > -(@getTotalItems()-@items()-1) * itemPortion - 5
+				@goToItem(@getCurrentItem()+1)
+
 
 	goToPrevItem: ->
 		# set vars
+		module = this
+		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
+		itemPortion2 = Math.round((100 / @_getRealTotalItems())*1000)/1000
 
 		# Apply movement if container is not to the starting position
-		if @getContainerPosition() < 0
+		if @_isLoop
 			@goToItem(@getCurrentItem()-1)
+			# console.log @getCurrentItem(), -@items()
+			if @getCurrentItem() == undefined
+				moduleWrapper.style.transition = 'none'
+				@goToItem(@getTotalItems() - @items())
+				console.log @getTotalItems() - @items()
+				moduleWrapper.style.transition = ''
+				@goToItem((@getTotalItems() - @items()) - 1)
+		else
+			if @getContainerPosition() < 0
+				@goToItem(@getCurrentItem()-1)
 
 	getCurrentPage: ->
 		# set vars
@@ -157,7 +231,8 @@ Polymer
 			lastItem = parseFloat(@getCurrentItem()) + parseFloat(@items())
 
 			if lastItem >= @getTotalItems()
-				@goToPage(@getTotalPages()-1)
+				if !@_isLoop()
+					@goToPage(@getTotalPages()-1)
 				return @getTotalPages()-1
 			if page.indexOf(@getCurrentItem()) != -1
 				return pageKey
@@ -168,14 +243,24 @@ Polymer
 		module = this
 		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
+		itemPortion2 = Math.round((100 / @_getRealTotalItems())*1000)/1000
 		pagePortionFix = (@items() - @getPages()[key].length) * itemPortion
+		pagePortionFix2 = (@items() - @getPages()[key].length) * itemPortion2
 		pagePortion = (-itemPortion * @items())
-		movement = Math.round(((key * pagePortion) + pagePortionFix)*1000)/1000
+		pagePortion2 = (-itemPortion2 * @items())
+
+		if @_isLoop()
+			movement = (Math.round(((key * pagePortion2) + pagePortionFix2)*1000)/1000) + pagePortion2
+		else
+			movement = Math.round(((key * pagePortion) + pagePortionFix)*1000)/1000
 
 		# Apply movement
-		if key < @getTotalPages() && key >= 0
-			if @items() < @getTotalItems()
-				moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+		if @_isLoop()
+			moduleWrapper.style.transform = 'translateX(' + movement + '%)'
+		else
+			if key < @getTotalPages() && key >= 0
+				if @items() < @getTotalItems()
+					moduleWrapper.style.transform = 'translateX(' + movement + '%)'
 
 		# set active dot
 		@_setActiveDot(key)
@@ -202,7 +287,10 @@ Polymer
 		module = this
 		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
 		moduleRect = module.getBoundingClientRect()
-		containerWidth = moduleRect.width * @getTotalItems() / @items()
+		if @_isLoop()
+			containerWidth = moduleRect.width * module._getRealTotalItems() / @items()
+		else
+			containerWidth = moduleRect.width * module.getTotalItems() / @items()
 		childWidth = Math.round(100/@getTotalItems()*10000)/10000
 
 		# set children width
@@ -298,21 +386,36 @@ Polymer
 		# set vars
 		module = this
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
+		itemPortion2 = Math.round((100 / @_getRealTotalItems())*1000)/1000
 		controlLeft = module.querySelector('.paper-carousel_controls_arrow-prev')
 		controlRight = module.querySelector('.paper-carousel_controls_arrow-next')
 
-		if (controlRight != null && controlLeft != null)
-			# add class to disable left control
-			if @getContainerPosition() > -5
-				controlLeft.classList.add('paper-carousel_controls_arrow--disabled')
-			else
-				controlLeft.classList.remove('paper-carousel_controls_arrow--disabled')
+		if @_isLoop()
+			# if (controlRight != null && controlLeft != null)
+			# 	# add class to disable left control
+			# 	if @getContainerPosition() + (@itemsToPrepend.length * itemPortion2) > -0.5
+			# 		controlLeft.classList.add('paper-carousel_controls_arrow--disabled')
+			# 	else
+			# 		controlLeft.classList.remove('paper-carousel_controls_arrow--disabled')
 
-			# add class to disable right control
-			if @getContainerPosition() < -(@getTotalItems()-@items()-1) * itemPortion
-				controlRight.classList.add('paper-carousel_controls_arrow--disabled')
-			else
-				controlRight.classList.remove('paper-carousel_controls_arrow--disabled')
+			# 	# add class to disable right control
+			# 	if @getContainerPosition() + (@itemsToPrepend.length * itemPortion2) < (-(@getTotalItems()-@items()-1) * itemPortion2) - 0.5
+			# 		controlRight.classList.add('paper-carousel_controls_arrow--disabled')
+			# 	else
+			# 		controlRight.classList.remove('paper-carousel_controls_arrow--disabled')
+		else
+			if (controlRight != null && controlLeft != null)
+				# add class to disable left control
+				if @getContainerPosition() > -0.5
+					controlLeft.classList.add('paper-carousel_controls_arrow--disabled')
+				else
+					controlLeft.classList.remove('paper-carousel_controls_arrow--disabled')
+
+				# add class to disable right control
+				if @getContainerPosition() < -(@getTotalItems()-@items()-1) * itemPortion
+					controlRight.classList.add('paper-carousel_controls_arrow--disabled')
+				else
+					controlRight.classList.remove('paper-carousel_controls_arrow--disabled')
 
 	_printDots: (force) ->
 		# set vars
@@ -483,6 +586,53 @@ Polymer
 				window.touchScroll = false
 				window.touching = false
 
+	_loop: ->
+		# set vars
+		module = this
+
+		if module._isLoop()
+			moduleWrapper = module.querySelector('.paper-carousel_wrapper')
+			totalItems = 0
+			module.itemsToAppend = []
+			module.itemsToPrepend = []
+			clonedItems = module.querySelectorAll('.paper-carousel_wrapper .cloned')
+
+			cloneItems = ->
+				childrenReverse = []
+
+				# set items to cloning
+				[].forEach.call moduleWrapper.children, (val, key) ->
+					if key < module.items()
+						clonedItem = val.cloneNode(true)
+						clonedItem.classList.add('cloned')
+						module.itemsToAppend.push clonedItem
+
+					if key >= (module.getTotalItems() - module.items()) && key <= module.getTotalItems()
+						childrenReverse.push(val)
+
+				[].forEach.call childrenReverse, (val, key) ->
+					if key < module.items()
+						clonedItem = val.cloneNode(true)
+						clonedItem.classList.add('cloned')
+						module.itemsToPrepend.push clonedItem
+
+			# reset cloned items
+			if clonedItems.length > 0
+				[].forEach.call clonedItems, (val, key) ->
+					val.remove()
+					if key == clonedItems.length - 1
+						cloneItems()
+			else
+				cloneItems()
+
+			# append cloned items
+			[].forEach.call module.itemsToAppend, (val, key) ->
+				moduleWrapper.appendChild val
+
+			# prepend cloned items
+			[].forEach.call module.itemsToPrepend.reverse(), (val, key) ->
+				moduleWrapper.insertBefore val.cloneNode(true), moduleWrapper.children[0]
+
 	_onDrag: ->
 		# set vars
 		module = this
@@ -492,19 +642,43 @@ Polymer
 		module.listen(this.$$('.paper-carousel_wrapper'), 'track', '_getDragState')
 		moduleWrapper.style.touchAction = ''
 
+	_setInitialPosition: ->
+		# set vars
+		module = this
+		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
+
+		# set carousel initial position
+		moduleWrapper.style.transition = 'none'
+		module.goToItem(0)
+		moduleWrapper.style.transition = ''
+
 	refresh: ->
 		@_setContainerSize()
 		@_printControls(true)
 		@_printDots(true)
 		@_onResize()
 
-	ready: ->
+	onTransitionEnd: (things) ->
+		# set vars
+		module = this
+		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
 
-	attached: ->
+		# add listener
+		moduleWrapper.addEventListener 'transitionend', things
+
+	ready: ->
+		@itemsToAppend = []
+		@itemsToPrepend = []
+		@listen window, 'WebComponentsReady', '_onLoad'
+
+	_onLoad: ->
 		@_onDrag()
 		@_onResize()
+		@_setInitialPosition()
 
 	_onResize: ->
+		@_loop()
 		@_setContainerSize()
 		@_printControls()
 		@_printDots()
+		@goToItem(@currentItem)
