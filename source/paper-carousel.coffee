@@ -555,7 +555,6 @@ Polymer
 				# Reset transition duration
 				module.resetTransition = () ->
 					if module._isLoop()
-						console.log module.getCurrentItem(), module.getTotalItems()
 						if module.getCurrentItem() == module.getTotalItems()
 							moduleWrapper.style.transition = 'none'
 							module.goToItem(0)
@@ -689,14 +688,6 @@ Polymer
 		@_printControls(true)
 		@_printDots(true)
 		@_onResize()
-
-	onTransitionEnd: (things) ->
-		# set vars
-		module = this
-		moduleWrapper = module.querySelector('.paper-carousel_wrapper')
-
-		# add listener
-		moduleWrapper.addEventListener 'transitionend', things
 
 	ready: ->
 		@itemsToAppend = []
