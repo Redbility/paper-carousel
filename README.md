@@ -71,6 +71,7 @@ Image gallery example:
 | dotText | Shows or hides numbers inside dots | Boolean | true |
 | prevIcon | Allows customize the prev arrow icon | String | image:navigate-before |
 | nextIcon | Allows customize the next arrow icon | String | image:navigate-next |
+| loop | Allows repeat slides infinitely | Boolean | false |
 
 ### Methods
 
