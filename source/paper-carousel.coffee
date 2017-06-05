@@ -189,11 +189,12 @@ Polymer
 		# Apply movement if container is not to the final position
 		if @_isLoop()
 			@goToItem(@getCurrentItem()+1)
-			if @getCurrentItem() == @getTotalItems() + 1
+
+			if @getCurrentItem() == @getTotalItems()
 				moduleWrapper.style.transition = 'none'
-				@goToItem(0)
+				@goToItem(-1)
 				moduleWrapper.style.transition = ''
-				@goToItem(1)
+				@goToItem(0)
 		else
 			if @getContainerPosition() > -(@getTotalItems()-@items()-1) * itemPortion - 5
 				@goToItem(@getCurrentItem()+1)
@@ -209,13 +210,12 @@ Polymer
 		# Apply movement if container is not to the starting position
 		if @_isLoop
 			@goToItem(@getCurrentItem()-1)
-			# console.log @getCurrentItem(), -@items()
-			if @getCurrentItem() == undefined
+
+			if @getCurrentItem() == -1
 				moduleWrapper.style.transition = 'none'
-				@goToItem(@getTotalItems() - @items())
-				console.log @getTotalItems() - @items()
+				@goToItem(@getTotalItems())
 				moduleWrapper.style.transition = ''
-				@goToItem((@getTotalItems() - @items()) - 1)
+				@goToItem(@getTotalItems() - 1)
 		else
 			if @getContainerPosition() < 0
 				@goToItem(@getCurrentItem()-1)
@@ -390,20 +390,7 @@ Polymer
 		controlLeft = module.querySelector('.paper-carousel_controls_arrow-prev')
 		controlRight = module.querySelector('.paper-carousel_controls_arrow-next')
 
-		if @_isLoop()
-			# if (controlRight != null && controlLeft != null)
-			# 	# add class to disable left control
-			# 	if @getContainerPosition() + (@itemsToPrepend.length * itemPortion2) > -0.5
-			# 		controlLeft.classList.add('paper-carousel_controls_arrow--disabled')
-			# 	else
-			# 		controlLeft.classList.remove('paper-carousel_controls_arrow--disabled')
-
-			# 	# add class to disable right control
-			# 	if @getContainerPosition() + (@itemsToPrepend.length * itemPortion2) < (-(@getTotalItems()-@items()-1) * itemPortion2) - 0.5
-			# 		controlRight.classList.add('paper-carousel_controls_arrow--disabled')
-			# 	else
-			# 		controlRight.classList.remove('paper-carousel_controls_arrow--disabled')
-		else
+		if !@_isLoop()
 			if (controlRight != null && controlLeft != null)
 				# add class to disable left control
 				if @getContainerPosition() > -0.5
@@ -488,7 +475,9 @@ Polymer
 		moduleWrapperRect = moduleWrapper.getBoundingClientRect()
 		movement = Math.round(((e.detail.dx*100) / moduleWrapperRect.width)*1000)/1000
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
+		itemPortion2 = Math.round((100 / @_getRealTotalItems())*1000)/1000
 		maxLimit = Math.round((itemPortion*(@getTotalItems()-@items()))*1000)/1000
+		maxLimit2 = Math.round((itemPortion2*(@_getRealTotalItems()-@items()))*1000)/1000
 		endTime = 0
 		touchValue = e.detail.dx
 
@@ -519,13 +508,16 @@ Polymer
 				# set vars
 				realMovement = Math.round((module.dragPosition+movement)*1000)/1000
 				realMovement = Math.min(realMovement, 0)
-				realMovement = Math.max(realMovement, -maxLimit)
+				if @_isLoop()
+					realMovement = Math.max(realMovement, -maxLimit2)
+				else
+					realMovement = Math.max(realMovement, -maxLimit)
 
 				if window.scrolling == false && window.touchScroll == false
-					if touchValue > 30 || touchValue < -30
+					if touchValue > 2 || touchValue < -2
 						# apply touch movement
 						if @items() < @getTotalItems() && window.movingCarousel == true
-							moduleWrapper.style.transform = 'translateX(' + realMovement + '%)'
+							moduleWrapper.style.transform = 'translateX(' + realMovement + '%) translateY(0) translateZ(0)'
 
 						# Setting on if touch move
 						window.movingCarousel = true
@@ -540,13 +532,20 @@ Polymer
 				endTime = new Date().getTime()
 				swipeVelocity = endTime - module.startTime
 				limitSwipeVelocity = Math.max(Math.min(swipeVelocity, 500), 100)
-				itemLoop = 0
+				if @_isLoop()
+					itemLoop = -1
+				else
+					itemLoop = 0
 
 				# limit transition duration
 				if @getContainerPosition() > -5
 					limitSwipeVelocity = 500
-				if @getContainerPosition() < -(@getTotalItems()-@items()) * itemPortion+5
-					limitSwipeVelocity = 500
+				if @_isLoop()
+					if @getContainerPosition() < -(@_getRealTotalItems()-@items()) * itemPortion+5
+						limitSwipeVelocity = 500
+				else
+					if @getContainerPosition() < -(@getTotalItems()-@items()) * itemPortion+5
+						limitSwipeVelocity = 500
 				if touchValue < 30 && touchValue > -30
 					limitSwipeVelocity = 500
 
@@ -555,31 +554,64 @@ Polymer
 
 				# Reset transition duration
 				module.resetTransition = () ->
+					if module._isLoop()
+						console.log module.getCurrentItem(), module.getTotalItems()
+						if module.getCurrentItem() == module.getTotalItems()
+							moduleWrapper.style.transition = 'none'
+							module.goToItem(0)
+							moduleWrapper.style.transition = ''
+						if @getCurrentItem() == -1
+							moduleWrapper.style.transition = 'none'
+							@goToItem(@getTotalItems()-1)
+							moduleWrapper.style.transition = ''
 					moduleWrapper.style.transitionDuration = ''
+
 				module.listen moduleWrapper, 'transitionend', 'resetTransition'
 
 				if window.scrolling == false && window.touchScroll == false
-					if touchValue > 30 || touchValue < -30
+					if touchValue > 2 || touchValue < -2
 						# adjust current item
-						while itemLoop < @getTotalItems()
-							startLimit = -Math.round((itemPortion*itemLoop)*1000)/1000
-							endLimit = -Math.round((itemPortion*(itemLoop+1))*1000)/1000
-							rangeLimit = Math.round((startLimit-endLimit)*1000)/1000
-							endRangeLimit = endLimit+rangeLimit/2
-							startRangeLimit = startLimit-rangeLimit/2
 
-							if movement < 0 && swipeVelocity < 150
-								if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
-									@goToItem(itemLoop+1)
-							if movement > 0 && swipeVelocity < 150
-								if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+						if @_isLoop()
+							while itemLoop < @_getRealTotalItems()
+								startLimit = -Math.round((itemPortion2*(itemLoop+@itemsToPrepend.length))*1000)/1000
+								endLimit = -Math.round((itemPortion2*(itemLoop+@itemsToPrepend.length+1))*1000)/1000
+								rangeLimit = Math.round((startLimit-endLimit)*1000)/1000
+								endRangeLimit = endLimit+rangeLimit/2
+								startRangeLimit = startLimit-rangeLimit/2
+
+								if movement < 0 && swipeVelocity < 150
+									if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+										@goToItem(itemLoop+1)
+								if movement > 0 && swipeVelocity < 150
+									if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+										@goToItem(itemLoop)
+
+								if @getContainerPosition() < startLimit && @getContainerPosition() >= endRangeLimit
 									@goToItem(itemLoop)
+								if @getContainerPosition() < startRangeLimit && @getContainerPosition() >= endLimit
+									@goToItem(itemLoop+1)
+								itemLoop++
+						else
+							while itemLoop < @getTotalItems()
+								startLimit = -Math.round((itemPortion*itemLoop)*1000)/1000
+								endLimit = -Math.round((itemPortion*(itemLoop+1))*1000)/1000
+								rangeLimit = Math.round((startLimit-endLimit)*1000)/1000
+								endRangeLimit = endLimit+rangeLimit/2
+								startRangeLimit = startLimit-rangeLimit/2
 
-							if @getContainerPosition() < startLimit && @getContainerPosition() >= endRangeLimit
-								@goToItem(itemLoop)
-							if @getContainerPosition() < startRangeLimit && @getContainerPosition() >= endLimit
-								@goToItem(itemLoop+1)
-							itemLoop++
+								if movement < 0 && swipeVelocity < 150
+									if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+										@goToItem(itemLoop+1)
+								if movement > 0 && swipeVelocity < 150
+									if @getContainerPosition() < startLimit && @getContainerPosition() >= endLimit
+										@goToItem(itemLoop)
+
+								if @getContainerPosition() < startLimit && @getContainerPosition() >= endRangeLimit
+									@goToItem(itemLoop)
+								if @getContainerPosition() < startRangeLimit && @getContainerPosition() >= endLimit
+									@goToItem(itemLoop+1)
+								itemLoop++
 
 				# Setting off if touch end
 				window.movingCarousel = false
