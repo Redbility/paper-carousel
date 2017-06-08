@@ -72,6 +72,8 @@ Image gallery example:
 | prevIcon | Allows customize the prev arrow icon | String | image:navigate-before |
 | nextIcon | Allows customize the next arrow icon | String | image:navigate-next |
 | loop | Allows repeat slides infinitely | Boolean | false |
+| autoplay | Allows play automatically | Boolean | false |
+| autoplaytime | Sets the time of autoplay in miliseconds | Number | 6000 |
 
 ### Methods
 
