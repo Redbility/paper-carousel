@@ -305,7 +305,11 @@ Polymer
 			containerWidth = moduleRect.width * module._getRealTotalItems() / @items()
 		else
 			containerWidth = moduleRect.width * module.getTotalItems() / @items()
-		childWidth = Math.round(100/@getTotalItems()*10000)/10000
+
+		if @_isLoop
+			childWidth = Math.round(100/@_getRealTotalItems()*10000)/10000
+		else
+			childWidth = Math.round(100/@getTotalItems()*10000)/10000
 
 		# set children width
 		for child in moduleWrapper.children
