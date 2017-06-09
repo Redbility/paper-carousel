@@ -66,20 +66,6 @@ Polymer
 		else
 			return false
 
-	_isAutoplay: ->
-		# set vars
-		module = this
-		value = module.getAttribute('autoplay')
-
-		#set item number
-		if (value != null)
-			if (value == 'true')
-				return true
-			else
-				return false
-		else
-			return false
-
 	getTotalItems: ->
 		# set vars
 		module = this
@@ -193,6 +179,9 @@ Polymer
 		@_setActiveDot(@getCurrentPage())
 		@_setDisabledControls()
 
+		# fire onMove callback
+		@_fireOnMoveEvent()
+
 	goToNextItem: ->
 		# set vars
 		module = this
@@ -212,7 +201,6 @@ Polymer
 		else
 			if @getContainerPosition() > -(@getTotalItems()-@items()-1) * itemPortion - 5
 				@goToItem(@getCurrentItem()+1)
-
 
 	goToPrevItem: ->
 		# set vars
@@ -280,6 +268,9 @@ Polymer
 		@_setActiveDot(key)
 		@_setDisabledControls()
 
+		# fire onMove callback
+		@_fireOnMoveEvent()
+
 	goToNextPage: ->
 		# set vars
 		itemPortion = Math.round((100 / @getTotalItems())*1000)/1000
@@ -296,6 +287,30 @@ Polymer
 		if @getContainerPosition() < -5
 			@goToPage(@getCurrentPage()-1)
 
+	_createOnMoveEvent: ->
+		# set vars
+		module = this
+		module.onMove = undefined
+
+		# create event
+		if document.createEvent
+			module.onMove = document.createEvent("HTMLEvents")
+			module.onMove.initEvent("onmove", true, true)
+		else
+			module.onMove = document.createEventObject()
+			module.onMove.eventType = "onmove"
+
+		module.onMove.eventName = "onmove"
+
+	_fireOnMoveEvent: ->
+		# set vars
+		module = this
+
+		if document.createEvent
+			module.dispatchEvent(module.onMove)
+		else
+			module.fireEvent("on" + module.onMove.eventType, module.onMove)
+
 	_setContainerSize: ->
 		# set vars
 		module = this
@@ -305,11 +320,7 @@ Polymer
 			containerWidth = moduleRect.width * module._getRealTotalItems() / @items()
 		else
 			containerWidth = moduleRect.width * module.getTotalItems() / @items()
-
-		if @_isLoop
-			childWidth = Math.round(100/@_getRealTotalItems()*10000)/10000
-		else
-			childWidth = Math.round(100/@getTotalItems()*10000)/10000
+		childWidth = Math.round(100/@getTotalItems()*10000)/10000
 
 		# set children width
 		for child in moduleWrapper.children
@@ -381,12 +392,8 @@ Polymer
 		prevLink.classList.add('paper-carousel_controls_arrow-prev')
 
 		# Click anchors event
-		nextLink.addEventListener 'click', (e) ->
-			e.preventDefault()
-			module._disableAutoPlay()
-		prevLink.addEventListener 'click', (e) ->
-			e.preventDefault()
-			module._disableAutoPlay()
+		nextLink.addEventListener 'click', (e) -> e.preventDefault()
+		prevLink.addEventListener 'click', (e) -> e.preventDefault()
 		module.listen nextLink, 'tap', 'goToNextItem'
 		module.listen prevLink, 'tap', 'goToPrevItem'
 
@@ -467,9 +474,7 @@ Polymer
 			module.clickDotsEvent = (e) ->
 				activeItem = e.target.getAttribute('data-rel')
 				@goToPage(activeItem)
-			dotItemLink.addEventListener 'click', (e) ->
-				e.preventDefault()
-				module._disableAutoPlay()
+			dotItemLink.addEventListener 'click', (e) -> e.preventDefault()
 			module.listen dotItemLink, 'tap', 'clickDotsEvent'
 			# set dot text
 			if @_dotText() == true
@@ -688,38 +693,6 @@ Polymer
 			[].forEach.call module.itemsToPrepend.reverse(), (val, key) ->
 				moduleWrapper.insertBefore val.cloneNode(true), moduleWrapper.children[0]
 
-	_autoPlay: ->
-		# set vars
-		module = @
-		if module.getAttribute('autoplaytime') != null && module.getAttribute('autoplaytime') != undefined
-			autoPlayIntervalTime = module.getAttribute('autoplaytime')
-		else
-			autoPlayIntervalTime = 6000
-
-		# set auto play interval
-		if module._isAutoplay()
-			module.autoPlayInterval = setInterval (->
-				# if is loop, go to next item infinitely
-				if module._isLoop()
-					module.goToNextItem()
-				# if not is loop, go to next item until last slide and go to first item again
-				else
-					if (module.getCurrentItem() + 1) < module.getTotalItems()
-						module.goToNextItem()
-					else
-						module.goToItem(0)
-			), autoPlayIntervalTime
-
-	_disableAutoPlay: ->
-		# set vars
-		module = @
-
-		# clear autoplay interval
-		if module._isAutoplay()
-			clearInterval module.autoPlayInterval
-			module._isAutoplay = ->
-				return false
-
 	_onDrag: ->
 		# set vars
 		module = this
@@ -738,6 +711,7 @@ Polymer
 		moduleWrapper.style.transition = 'none'
 		module.goToItem(0)
 		moduleWrapper.style.transition = ''
+		module.initialize = true
 
 	refresh: ->
 		@_setContainerSize()
@@ -748,17 +722,18 @@ Polymer
 	ready: ->
 		@itemsToAppend = []
 		@itemsToPrepend = []
+		@_createOnMoveEvent()
 		@listen window, 'WebComponentsReady', '_onLoad'
 
 	_onLoad: ->
 		@_onDrag()
 		@_onResize()
 		@_setInitialPosition()
-		@_autoPlay()
 
 	_onResize: ->
 		@_loop()
 		@_setContainerSize()
 		@_printControls()
 		@_printDots()
-		@goToItem(@currentItem)
+		if @initialize == true
+			@goToItem(@currentItem)
