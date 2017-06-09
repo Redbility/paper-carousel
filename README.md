@@ -91,6 +91,12 @@ Image gallery example:
 | goToPrevPage() | Moves carousel to the prev page |
 | refresh() | Forces carousel reload |
 
+### Events
+
+| Event Name | Explanation |
+|-------------|-------------|
+| onmove | Is called each time the carousel moves |
+
 ### How to contribute
 
 This element has been developed on Pug, Sass and CoffeeScript, you can find this files at `source` folder.
