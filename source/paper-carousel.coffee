@@ -66,6 +66,18 @@ Polymer
 		else
 			return false
 
+	_transitionSpeed: ->
+		# set vars
+		module = this
+		value = module.getAttribute('transitionspeed')
+
+		#set speed value
+		if (value != null || value != undefined)
+			module.customStyle['--transition-speed'] = value + 'ms'
+			module.updateStyles()
+		else
+			return false
+
 	getTotalItems: ->
 		# set vars
 		module = this
@@ -729,6 +741,7 @@ Polymer
 		@_onDrag()
 		@_onResize()
 		@_setInitialPosition()
+		@_transitionSpeed()
 
 	_onResize: ->
 		@_loop()
