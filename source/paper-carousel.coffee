@@ -66,6 +66,20 @@ Polymer
 		else
 			return false
 
+	_isAutoplay: ->
+		# set vars
+		module = this
+		value = module.getAttribute('autoplay')
+
+		#set item number
+		if (value != null)
+			if (value == 'true')
+				return true
+			else
+				return false
+		else
+			return false
+
 	getTotalItems: ->
 		# set vars
 		module = this
@@ -320,7 +334,11 @@ Polymer
 			containerWidth = moduleRect.width * module._getRealTotalItems() / @items()
 		else
 			containerWidth = moduleRect.width * module.getTotalItems() / @items()
-		childWidth = Math.round(100/@getTotalItems()*10000)/10000
+
+		if @_isLoop
+			childWidth = Math.round(100/@_getRealTotalItems()*10000)/10000
+		else
+			childWidth = Math.round(100/@getTotalItems()*10000)/10000
 
 		# set children width
 		for child in moduleWrapper.children
@@ -392,8 +410,12 @@ Polymer
 		prevLink.classList.add('paper-carousel_controls_arrow-prev')
 
 		# Click anchors event
-		nextLink.addEventListener 'click', (e) -> e.preventDefault()
-		prevLink.addEventListener 'click', (e) -> e.preventDefault()
+		nextLink.addEventListener 'click', (e) ->
+			e.preventDefault()
+			module._disableAutoPlay()
+		prevLink.addEventListener 'click', (e) ->
+			e.preventDefault()
+			module._disableAutoPlay()
 		module.listen nextLink, 'tap', 'goToNextItem'
 		module.listen prevLink, 'tap', 'goToPrevItem'
 
@@ -474,7 +496,9 @@ Polymer
 			module.clickDotsEvent = (e) ->
 				activeItem = e.target.getAttribute('data-rel')
 				@goToPage(activeItem)
-			dotItemLink.addEventListener 'click', (e) -> e.preventDefault()
+			dotItemLink.addEventListener 'click', (e) ->
+				e.preventDefault()
+				module._disableAutoPlay()
 			module.listen dotItemLink, 'tap', 'clickDotsEvent'
 			# set dot text
 			if @_dotText() == true
@@ -693,6 +717,38 @@ Polymer
 			[].forEach.call module.itemsToPrepend.reverse(), (val, key) ->
 				moduleWrapper.insertBefore val.cloneNode(true), moduleWrapper.children[0]
 
+	_autoPlay: ->
+		# set vars
+		module = @
+		if module.getAttribute('autoplaytime') != null && module.getAttribute('autoplaytime') != undefined
+			autoPlayIntervalTime = module.getAttribute('autoplaytime')
+		else
+			autoPlayIntervalTime = 6000
+
+		# set auto play interval
+		if module._isAutoplay()
+			module.autoPlayInterval = setInterval (->
+				# if is loop, go to next item infinitely
+				if module._isLoop()
+					module.goToNextItem()
+				# if not is loop, go to next item until last slide and go to first item again
+				else
+					if (module.getCurrentItem() + 1) < module.getTotalItems()
+						module.goToNextItem()
+					else
+						module.goToItem(0)
+			), autoPlayIntervalTime
+
+	_disableAutoPlay: ->
+		# set vars
+		module = @
+
+		# clear autoplay interval
+		if module._isAutoplay()
+			clearInterval module.autoPlayInterval
+			module._isAutoplay = ->
+				return false
+
 	_onDrag: ->
 		# set vars
 		module = this
@@ -729,6 +785,7 @@ Polymer
 		@_onDrag()
 		@_onResize()
 		@_setInitialPosition()
+		@_autoPlay()
 
 	_onResize: ->
 		@_loop()
