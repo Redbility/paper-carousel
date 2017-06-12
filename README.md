@@ -73,7 +73,8 @@ Image gallery example:
 | nextIcon | Allows customize the next arrow icon | String | image:navigate-next |
 | loop | Allows repeat slides infinitely | Boolean | false |
 | autoplay | Allows play automatically | Boolean | false |
-| autoplaytime | Sets the time of autoplay in miliseconds | Number | 6000 |
+| autoplaytime | Sets the time of autoplay in milliseconds | Number | 6000 |
+| transitionspeed | Sets transition speed in milliseconds | Number | 500 |
 
 ### Methods
 
