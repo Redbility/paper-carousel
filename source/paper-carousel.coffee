@@ -72,7 +72,7 @@ Polymer
 		value = module.getAttribute('transitionspeed')
 
 		#set speed value
-		if (value != null || value != undefined)
+		if (value != null && value != undefined)
 			module.customStyle['--transition-speed'] = value + 'ms'
 			module.updateStyles()
 
