@@ -576,7 +576,9 @@ Polymer
 				else
 					realMovement = Math.max(realMovement, -maxLimit)
 
-				if window.scrolling == false && window.touchScroll == false
+				console.log window.scrolling, window.touchScroll
+
+				if (window.scrolling == false || window.scrolling == undefined) && (window.touchScroll == false || window.touchScroll == undefined)
 					if touchValue > 2 || touchValue < -2
 						# apply touch movement
 						if @items() < @getTotalItems() && window.movingCarousel == true
@@ -630,7 +632,7 @@ Polymer
 
 				module.listen moduleWrapper, 'transitionend', 'resetTransition'
 
-				if window.scrolling == false && window.touchScroll == false
+				if (window.scrolling == false || window.scrolling == undefined) && (window.touchScroll == false || window.touchScroll == undefined)
 					if touchValue > 2 || touchValue < -2
 						# adjust current item
 
