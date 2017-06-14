@@ -786,10 +786,20 @@ Polymer
 		@_onResize()
 
 	ready: ->
+		# set vars
+		module = @
 		@itemsToAppend = []
 		@itemsToPrepend = []
+
+		# functions
 		@_createOnMoveEvent()
-		@listen window, 'WebComponentsReady', '_onLoad'
+
+		# waiting for load
+		@async(->
+			setTimeout (->
+				module._onLoad()
+			), 0
+		)
 
 	_onLoad: ->
 		@_onDrag()
