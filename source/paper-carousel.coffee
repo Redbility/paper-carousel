@@ -786,8 +786,6 @@ Polymer
 		@_onResize()
 
 	ready: ->
-		# set vars
-		module = @
 		@itemsToAppend = []
 		@itemsToPrepend = []
 
@@ -795,6 +793,9 @@ Polymer
 		@_createOnMoveEvent()
 
 	attached: ->
+		# set vars
+		module = @
+
 		# waiting for load
 		@async(->
 			setTimeout (->
