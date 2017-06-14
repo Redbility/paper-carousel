@@ -794,6 +794,7 @@ Polymer
 		# functions
 		@_createOnMoveEvent()
 
+	attached: ->
 		# waiting for load
 		@async(->
 			setTimeout (->
