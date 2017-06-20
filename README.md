@@ -90,7 +90,7 @@ Image gallery example:
 | goToPage(number) | Moves carousel to the page position |
 | goToNextPage() | Moves carousel to the next page |
 | goToPrevPage() | Moves carousel to the prev page |
-| refresh() | Forces carousel reload |
+| refresh() | Forces carousel reloa |
 
 ### Events
 
