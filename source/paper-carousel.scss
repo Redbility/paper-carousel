@@ -1,4 +1,5 @@
-:host {
+:host,
+paper-carousel {
 	display: block;
 	position: relative;
 	overflow: hidden;
@@ -173,26 +174,48 @@
 	}
 }
 
-.paper-carousel_wrapper ::slotted(.paper-carousel-demo-indigo) {
+.paper-carousel_wrapper [class*=paper-carousel-demo] {
+	position: relative;
+	height: 400px;
+
+	&::before {
+		position: absolute;
+		content: attr(data-text);
+		color: var(--dot-background-color);
+		font-size: 3rem;
+		font-weight: bold;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+}
+
+.paper-carousel_wrapper ::slotted(.paper-carousel-demo-indigo),
+.paper-carousel_wrapper .paper-carousel-demo-indigo {
 	background-color: var(--paper-indigo-500);
 }
 
-.paper-carousel_wrapper ::slotted(.paper-carousel-demo-pink) {
+.paper-carousel_wrapper ::slotted(.paper-carousel-demo-pink),
+.paper-carousel_wrapper .paper-carousel-demo-pink {
 	background-color: var(--paper-pink-500);
 }
 
-.paper-carousel_wrapper ::slotted(.paper-carousel-demo-teal) {
+.paper-carousel_wrapper ::slotted(.paper-carousel-demo-teal),
+.paper-carousel_wrapper .paper-carousel-demo-teal {
 	background-color: var(--paper-teal-500);
 }
 
-.paper-carousel_wrapper ::slotted(.paper-carousel-demo-amber) {
+.paper-carousel_wrapper ::slotted(.paper-carousel-demo-amber),
+.paper-carousel_wrapper .paper-carousel-demo-amber {
 	background-color: var(--paper-amber-500);
 }
 
-.paper-carousel_wrapper ::slotted(.paper-carousel-demo-green) {
+.paper-carousel_wrapper ::slotted(.paper-carousel-demo-green),
+.paper-carousel_wrapper .paper-carousel-demo-green {
 	background-color: var(--paper-green-500);
 }
 
-.paper-carousel_wrapper ::slotted(.paper-carousel-demo-blue) {
+.paper-carousel_wrapper ::slotted(.paper-carousel-demo-blue),
+.paper-carousel_wrapper .paper-carousel-demo-blue {
 	background-color: var(--paper-blue-500);
 }

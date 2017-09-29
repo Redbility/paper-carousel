@@ -1,35 +1,133 @@
 if (Polymer.Element) {
 
-	class paperCarousel extends Polymer.mixinBehaviors([Polymer.IronResizableBehavior], Polymer.Element) {
+	class PaperCarousel extends Polymer.mixinBehaviors([Polymer.IronResizableBehavior], Polymer.Element) {
 		static get is() {return 'paper-carousel'}
 
-		_setContainerSize() {
-			var module, moduleWrapper, moduleRect;
+		items() {
+			var module, moduleRect, breakpoints, breakpointKey, breakpoint, nextBreakpoint;
 
 			module = this;
-			moduleWrapper = module.shadowRoot.querySelector('.paper-carousel_wrapper');
-			moduleRect = module.getBoundingClientRect()
+			moduleRect = module.getBoundingClientRect();
 
-			console.log(moduleRect);
+			if(module.getAttribute('responsive') != null) {
+				breakpoints = module.getAttribute('responsive').replace(/\s/g, '').split(',');
+				breakpointKey = 0;
+
+				while(breakpointKey < breakpoints.length) {
+					// Set loop vars
+					breakpoint = breakpoints[breakpointKey].split(':');
+
+					if(breakpoints[breakpointKey+1]) {
+						nextBreakpoint = breakpoints[breakpointKey+1].split(':')
+					} else {
+						nextBreakpoint = {0:0}
+					}
+
+					// Set rwd items
+					if(moduleRect.width <= breakpoint[0] && moduleRect.width > nextBreakpoint[0]) {
+						return breakpoint[1]
+					}
+
+					breakpointKey++
+				}
+			}
+
+			// Set item numbers
+			if(module.getAttribute('items') != null) {
+				return module.getAttribute('items');
+			} else {
+				return 1;
+			}
 		}
+
+		_isLoop() {
+			var module, value;
+			// Set vars
+			module = this;
+			value = module.getAttribute('loop');
+
+			// Set item number
+			if (value != null) {
+				if (value == 'true') {
+					return true
+				} else {
+					return false
+				}
+			}else {
+				return false
+			}
+		};
+
+		_getRealTotalItems() {
+			const childs = Polymer.dom(this).children;
+			return childs.length;
+		};
+
+		_setContainerSize() {
+			var module, dom, moduleWrapper, moduleRect, containerWidth, childWidth;
+			// Set vars
+			module = this;
+			dom = module.shadowRoot;
+
+			moduleWrapper = dom.querySelector('.paper-carousel_wrapper');
+			moduleRect = module.getBoundingClientRect();
+
+			if(module._isLoop()) {
+				containerWidth = moduleRect.width * module._getRealTotalItems() / module.items()
+			} else {
+				// containerWidth = moduleRect.width * module._getTotalItems() / module.items()
+			}
+
+			if(module._isLoop()) {
+				childWidth = Math.round(100/module._getRealTotalItems()*10000)/10000
+			} else {
+				// childWidth = Math.round(100/module._getTotalItems()*10000)/10000
+			}
+
+			// Set children width
+			[].forEach.call(Polymer.dom(this).children, function(node) {
+				if(node.localName != undefined) {
+					node.style.width = childWidth + '%'
+				}
+			})
+			// Set container width
+			return moduleWrapper.style.minWidth = containerWidth + 'px';
+		};
+
+
+		// Own Callbacks
+		_onLoad() {
+			this._onResize();
+		};
+
+		_onResize() {
+			this.addEventListener('iron-resize', e => {
+				this._setContainerSize();
+			});
+		}
+
+
+		// Native Callbacks
+		constructor() {
+			super();
+		};
 
 		connectedCallback() {
-			super.connectedCallback();
-
-			this._setContainerSize();
-		}
+			this.async(() => {
+				super.connectedCallback();
+				this._onLoad();
+			}, 10)
+		};
 
 		ready() {
 			super.ready();
-			this.addEventListener('iron-resize', e => this._onResize());
-		}
 
-		_onResize() {
-			this._setContainerSize();
+			this._onResize();
+			this._getTotalItems();
 		}
 	}
 
-	customElements.define(paperCarousel.is, paperCarousel);
+	customElements.define(PaperCarousel.is, PaperCarousel);
 
 }else {
 	Polymer({
