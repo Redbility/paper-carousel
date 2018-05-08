@@ -1,4 +1,8 @@
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg?style=flat-square)](https://beta.webcomponents.org/element/Redbility/paper-carousel)
+  
+[![Published on Vaadin  Directory](https://img.shields.io/badge/Vaadin%20Directory-published-00b4f0.svg?style=flat-square)](https://vaadin.com/directory/component/Redbilitypaper-carousel)
+[![Stars on vaadin.com/directory](https://img.shields.io/vaadin-directory/star/Redbilitypaper-carousel.svg?style=flat-square)](https://vaadin.com/directory/component/Redbilitypaper-carousel)
+
 
 # Paper-carousel
 
